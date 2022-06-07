@@ -98,7 +98,7 @@ const HomePage = () => {
 
   return (
     <div className="mt-10">
-      <h1 className="font-bold text-3xl">Home Page</h1>
+      <h1 className="font-bold text-3xl">Listado Principal</h1>
       <div className="mt-10 bg-white p-5 rounded-xl shadow-md">
         <table className="table-auto w-full">
           <thead>
@@ -108,7 +108,8 @@ const HomePage = () => {
               <th className="bg-green-500 py-2">Fecha Nac</th>
               <th className="bg-green-500 py-2">Tip. Nomina</th>
               <th className="bg-green-500 py-2">Municipio</th>
-              <th className="bg-green-500 py-2 rounded-tr-xl">Region</th>
+              <th className="bg-green-500 py-2">Region</th>
+              <th className="bg-green-500 py-2 rounded-tr-xl">Edad</th>
             </tr>
           </thead>
           <tbody>
@@ -145,6 +146,9 @@ const HomePage = () => {
                       </td>
                       <td className="py-1  text-center">
                         {payroll.region.descripcion}
+                      </td>
+                      <td className="py-1  text-center">
+                        {payroll.edad}
                       </td>
                     </tr>
                   ))}

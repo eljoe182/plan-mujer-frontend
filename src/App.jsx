@@ -4,7 +4,7 @@ import MainLayout from "./layouts/MainLayout";
 import CreatePayrollPage from "./pages/CreatePayrollPage";
 import HomePage from "./pages/HomePage";
 import ShowPersonPage from "./pages/ShowPersonPage";
-
+import CitaPage from "./pages/CitaPage";
 function App() {
   return (
     <MainProvider>
@@ -14,6 +14,7 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="create_payroll" element={<CreatePayrollPage />} />
             <Route path="find_person" element={<ShowPersonPage />} />
+            <Route path="cita" element={<CitaPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

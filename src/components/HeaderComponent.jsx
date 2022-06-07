@@ -41,6 +41,17 @@ const HeaderComponent = () => {
         >
           Buscar
         </Link>
+        <Link
+          className={`${
+            menuActive === "Cita" ? "bg-black/30" : ""
+          } hover:bg-black/20 p-5`}
+          to="/cita"
+          onClick={() => {
+            setMenuActive("Cita");
+          }}
+        >
+          Cita
+        </Link>
       </nav>
     </div>
   );
