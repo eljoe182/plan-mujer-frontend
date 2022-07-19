@@ -19,6 +19,35 @@ export const getByDocumentNumber = async (documentNumber) => {
     .catch((error) => new Error(error.message));
 };
 
+export const edit = async (id) => {
+  return fetch(`${baseUrl}/edit/${id}`, {
+    method: "GET",
+  })
+    .then((res) => res.json())
+    .catch((error) => new Error(error.message));
+};
+
+export const update = async ({ id, municipality, region }) => {
+  return fetch(`${baseUrl}/update/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ municipality, region }),
+  })
+    .then((res) => res.json())
+    .catch((error) => new Error(error.message));
+};
+
+export const getByFullName = async ({ query, page, size }) => {
+  console.log({ query, page, size });
+  return fetch(`${baseUrl}/show/${query}?page=${page}&size=${size}`, {
+    method: "GET",
+  })
+    .then((res) => res.json())
+    .catch((error) => new Error(error.message));
+};
+
 export const getResources = async () => {
   return fetch(`${baseUrl}/create`, {
     method: "GET",

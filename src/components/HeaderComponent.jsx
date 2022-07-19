@@ -5,9 +5,9 @@ import { useMenu } from "../hooks/useMenu";
 const HeaderComponent = () => {
   const { menuActive, setMenuActive } = useMenu();
   return (
-    <div className="bg-lime-600 px-20 flex flex-row items-center">
-      <h1 className="font-bold text-white text-2xl">Nomina</h1>
-      <nav className="ml-20 flex text-white">
+    <div className="bg-lime-500 px-20 flex flex-row items-center">
+      <h1 className="font-bold text-neutral-700 text-2xl">Nomina</h1>
+      <nav className="ml-20 flex text-neutral-700 font-semibold">
         <Link
           className={`${
             menuActive === "home" ? "bg-black/30" : ""
@@ -18,17 +18,6 @@ const HeaderComponent = () => {
           }}
         >
           Home
-        </Link>
-        <Link
-          className={`${
-            menuActive === "create" ? "bg-black/30" : ""
-          } hover:bg-black/20 p-5`}
-          to="/create_payroll"
-          onClick={() => {
-            setMenuActive("create");
-          }}
-        >
-          Registrar
         </Link>
         <Link
           className={`${
