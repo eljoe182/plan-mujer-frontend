@@ -2,7 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import LoadingComponent from "../components/LoadingComponent";
 import ModalComponent from "../components/ModalComponent";
 import TableComponent from "../components/TableComponent";
-import { edit, getByFullName, update } from "../services/payroll.api";
+import {
+  edit,
+  getByDocumentNumber,
+  getByFullName,
+  update,
+} from "../services/payroll.api";
 
 const FILTER_INITIAL = {
   page: 1,
@@ -14,6 +19,7 @@ const ShowPersonPage = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [filter, setFilter] = useState(FILTER_INITIAL);
   const [showModal, setShowModal] = useState(false);
+  const [optionInput, setOptionInput] = useState(1);
 
   const [infoPage, setInfoPage] = useState(1);
   const [infoSize, setInfoSize] = useState(10);
@@ -28,16 +34,34 @@ const ShowPersonPage = () => {
   const fetchData = async () => {
     if (query === "") return;
     setLoadingData(true);
-    const { size, page, rows, rowsCount } = await getByFullName({
-      query,
-      page: infoPage ?? 1,
-      size: infoSize ?? 10,
-    });
+
+    let result;
+
+    if (optionInput === 1) {
+      result = await getByDocumentNumber(query);
+    } else {
+      console.log({
+        query,
+        page: infoPage ?? 1,
+        size: infoSize ?? 10,
+      });
+      result = await getByFullName({
+        query,
+        page: infoPage ?? 1,
+        size: infoSize ?? 10,
+      });
+    }
+    console.log({ result });
+    const { size, page, rows, rowsCount } = result;
     setInfoSize(size);
     setInfoPage(page);
-    setData(rows);
     setInfoRowsCount(rowsCount);
     setLoadingData(false);
+    if (rows.length === 0) {
+      setData([]);
+      return;
+    }
+    setData(rows);
   };
 
   const onNext = () => {
@@ -169,35 +193,69 @@ const ShowPersonPage = () => {
     });
   };
 
+  const onChangeOptionSearch = (e) => {
+    setOptionInput(Number(e.target.value));
+  };
+
   return (
     <div className="mt-10">
       <h1 className="font-bold text-3xl">Buscador</h1>
       <p className="text-lime-600/80 italic text-sm">
         Busca un trabajador aquí
       </p>
+      <div className="mt-5 flex justify-center py-5 ">
+        <form
+          className="bg-white p-5 rounded-xl shadow-md"
+          onSubmit={handleSubmit}
+        >
+          <div>
+            <span>Buscar por: </span>
+            <div className="flex gap-2">
+              <label htmlFor="option1">
+                Cedula:{" "}
+                <input
+                  type="radio"
+                  name="optionSearch"
+                  id="option1"
+                  value={1}
+                  onChange={onChangeOptionSearch}
+                  checked={optionInput === 1}
+                />
+              </label>
+              <label htmlFor="option2">
+                Nombre:{" "}
+                <input
+                  type="radio"
+                  name="optionSearch"
+                  id="option2"
+                  value={2}
+                  onChange={onChangeOptionSearch}
+                />
+              </label>
+            </div>
+          </div>
+          <div className="mt-2">
+            <input
+              type="text"
+              placeholder={
+                optionInput === 1 ? "Ej. 12345678" : "Ej. Juan Perez"
+              }
+              className="py-2 rounded-3xl border-2 px-4 placeholder:text-neutral-300 bg-neutral-100 focus:bg-white"
+              onChange={(e) => setQuery(e.target.value)}
+              required={true}
+            />
+            <button className="bg-green-600 rounded-3xl px-4 py-2 ml-5 text-white hover:bg-green-700">
+              Buscar
+            </button>
+          </div>
+        </form>
+      </div>
       {loadingData ? (
         <>
           <LoadingComponent text="Buscando" />
         </>
       ) : (
         <>
-          <div className="mt-5 flex justify-center py-5 ">
-            <form
-              className="bg-white p-5 rounded-xl shadow-md"
-              onSubmit={handleSubmit}
-            >
-              <input
-                type="text"
-                placeholder="Juan Perez"
-                className="py-2 rounded-3xl border-2 px-4 placeholder:text-neutral-300 bg-neutral-100 focus:bg-white"
-                onChange={(e) => setQuery(e.target.value)}
-                required={true}
-              />
-              <button className="bg-green-600 rounded-3xl px-4 py-2 ml-5 text-white hover:bg-green-700">
-                Buscar
-              </button>
-            </form>
-          </div>
           {data?.length > 0 && (
             <TableComponent
               rows={data}

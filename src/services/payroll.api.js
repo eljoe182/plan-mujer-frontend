@@ -12,7 +12,7 @@ export const getAll = async ({ page, size }) => {
 };
 
 export const getByDocumentNumber = async (documentNumber) => {
-  return fetch(`${baseUrl}/show/${documentNumber}`, {
+  return fetch(`${baseUrl}/showByDocument/${documentNumber}`, {
     method: "GET",
   })
     .then((res) => res.json())
