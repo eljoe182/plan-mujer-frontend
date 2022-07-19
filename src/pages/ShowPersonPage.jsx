@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import LoadingComponent from "../components/LoadingComponent";
 import ModalComponent from "../components/ModalComponent";
 import TableComponent from "../components/TableComponent";
+import { useMenu } from "../hooks/useMenu";
 import {
   edit,
   getByDocumentNumber,
@@ -16,6 +17,7 @@ const FILTER_INITIAL = {
 };
 
 const ShowPersonPage = () => {
+  const { setMenuActive } = useMenu();
   const [query, setQuery] = useState("");
   const [loadingData, setLoadingData] = useState(false);
   const [filter, setFilter] = useState(FILTER_INITIAL);
@@ -34,6 +36,10 @@ const ShowPersonPage = () => {
   const [resourcesData, setResourcesData] = useState({});
   const [region, setRegion] = useState("-");
   const [municipality, setMunicipality] = useState("");
+
+  useEffect(() => {
+    setMenuActive("show");
+  }, []);
 
   const fetchData = async () => {
     if (query === "") return;
