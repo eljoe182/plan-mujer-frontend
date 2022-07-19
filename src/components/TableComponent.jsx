@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import LoadingComponent from "./LoadingComponent";
-import { getAll } from "../services/payroll.api";
 
 const chevronLeft = (
   <svg

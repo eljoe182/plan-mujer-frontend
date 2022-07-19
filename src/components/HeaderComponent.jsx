@@ -5,7 +5,7 @@ import { useMenu } from "../hooks/useMenu";
 const HeaderComponent = () => {
   const { menuActive, setMenuActive } = useMenu();
   return (
-    <div className="bg-lime-500 px-20 flex flex-row items-center">
+    <div className="bg-green-500 px-20 flex flex-row items-center">
       <h1 className="font-bold text-neutral-700 text-2xl">Nomina</h1>
       <nav className="ml-20 flex text-neutral-700 font-semibold">
         <Link

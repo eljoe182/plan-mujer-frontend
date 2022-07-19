@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import LoadingComponent from "../components/LoadingComponent";
 import ModalComponent from "../components/ModalComponent";
 import TableComponent from "../components/TableComponent";
@@ -20,6 +21,9 @@ const ShowPersonPage = () => {
   const [filter, setFilter] = useState(FILTER_INITIAL);
   const [showModal, setShowModal] = useState(false);
   const [optionInput, setOptionInput] = useState(1);
+  const regionRef = useRef();
+  const municipalityRef = useRef();
+  const formRef = useRef();
 
   const [infoPage, setInfoPage] = useState(1);
   const [infoSize, setInfoSize] = useState(10);
@@ -38,20 +42,19 @@ const ShowPersonPage = () => {
     let result;
 
     if (optionInput === 1) {
+      if (Number.isNaN(Number(query))) {
+        toast.error("Se espera un numero de cedula");
+        setLoadingData(false);
+        return;
+      }
       result = await getByDocumentNumber(query);
     } else {
-      console.log({
-        query,
-        page: infoPage ?? 1,
-        size: infoSize ?? 10,
-      });
       result = await getByFullName({
         query,
         page: infoPage ?? 1,
         size: infoSize ?? 10,
       });
     }
-    console.log({ result });
     const { size, page, rows, rowsCount } = result;
     setInfoSize(size);
     setInfoPage(page);
@@ -59,6 +62,7 @@ const ShowPersonPage = () => {
     setLoadingData(false);
     if (rows.length === 0) {
       setData([]);
+      toast.error("No se encontraron resultados");
       return;
     }
     setData(rows);
@@ -99,25 +103,16 @@ const ShowPersonPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await fetchData();
+    formRef.current.reset();
   };
 
   const onEdit = async (id) => {
-    const { payroll, municipality } = await edit(id);
+    const { payroll, municipality, region } = await edit(id);
 
-    const regionFiltered = [];
+    const municipalityFiltered = municipality.filter(
+      (item) => item.region.id === payroll.region.id
+    );
 
-    const municipalityFiltered = municipality.map((item) => {
-      const { region } = item;
-
-      const result = regionFiltered.find(
-        (reg) => reg.descripcion === region.descripcion
-      );
-
-      if (!result) {
-        regionFiltered.push(region);
-      }
-      return item;
-    });
     setDataModal({
       id: payroll.id,
       fullName: payroll.Nom_titular,
@@ -129,11 +124,11 @@ const ShowPersonPage = () => {
       municipality: payroll.municipio.descripcion,
     });
     setResourcesData({
-      municipality: [],
       municipalityFiltered,
-      region: regionFiltered.sort((a, b) =>
+      municipality: municipality.sort((a, b) =>
         a.descripcion.localeCompare(b.descripcion)
       ),
+      region: region.sort((a, b) => a.descripcion.localeCompare(b.descripcion)),
     });
     setShowModal(true);
   };
@@ -161,6 +156,23 @@ const ShowPersonPage = () => {
     }
   };
 
+  const handleChangeRegion = (e) => {
+    const { options, selectedIndex } = e.target;
+    const regionFiltered = resourcesData.region.find(
+      (item) => item.id === Number(options[selectedIndex].value)
+    );
+
+    const municipalityFiltered = resourcesData.municipality
+      .filter((item) => item.region.id === regionFiltered.id)
+      .sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+
+    setRegion(regionFiltered);
+    setResourcesData({
+      ...resourcesData,
+      municipalityFiltered,
+    });
+  };
+
   const handleChangeMunicipality = (e) => {
     const { options, selectedIndex } = e.target;
     const municipalityFiltered = resourcesData.municipality.find(
@@ -173,23 +185,6 @@ const ShowPersonPage = () => {
     setRegion({
       id: municipalityFiltered?.region.id,
       description: municipalityFiltered?.region.descripcion,
-    });
-  };
-
-  const handleChangeRegion = (e) => {
-    const { options, selectedIndex } = e.target;
-    const regionFiltered = resourcesData.region.find(
-      (item) => item.id === Number(options[selectedIndex].value)
-    );
-
-    const municipalityFiltered = resourcesData.municipalityFiltered
-      .filter((item) => item.region.id === regionFiltered.id)
-      .sort((a, b) => a.descripcion.localeCompare(b.descripcion));
-
-    setRegion(regionFiltered);
-    setResourcesData({
-      ...resourcesData,
-      municipality: municipalityFiltered,
     });
   };
 
@@ -207,6 +202,7 @@ const ShowPersonPage = () => {
         <form
           className="bg-white p-5 rounded-xl shadow-md"
           onSubmit={handleSubmit}
+          ref={formRef}
         >
           <div>
             <span>Buscar por: </span>
@@ -220,6 +216,7 @@ const ShowPersonPage = () => {
                   value={1}
                   onChange={onChangeOptionSearch}
                   checked={optionInput === 1}
+                  required={true}
                 />
               </label>
               <label htmlFor="option2">
@@ -230,6 +227,7 @@ const ShowPersonPage = () => {
                   id="option2"
                   value={2}
                   onChange={onChangeOptionSearch}
+                  required={true}
                 />
               </label>
             </div>
@@ -308,6 +306,7 @@ const ShowPersonPage = () => {
                 name="region"
                 id="region"
                 onChange={handleChangeRegion}
+                ref={regionRef}
               >
                 <option value="">Seleccione una opción</option>
                 {resourcesData.region &&
@@ -332,10 +331,11 @@ const ShowPersonPage = () => {
                 name="municipality"
                 id="municipality"
                 onChange={handleChangeMunicipality}
+                ref={municipalityRef}
               >
                 <option value="">Seleccione una opción</option>
-                {resourcesData.municipality &&
-                  resourcesData.municipality.map((item) => (
+                {resourcesData.municipalityFiltered &&
+                  resourcesData.municipalityFiltered.map((item) => (
                     <option
                       key={item.id}
                       value={item.id}
@@ -349,7 +349,7 @@ const ShowPersonPage = () => {
           </div>
           <div className="text-center mt-5">
             <button className="bg-green-600 rounded-3xl px-4 py-2 ml-5 text-white hover:bg-green-700">
-              Editar
+              Guardar
             </button>
           </div>
         </form>
